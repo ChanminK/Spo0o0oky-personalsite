@@ -1,2 +1,7 @@
 # Spo0o0oky-personalsite
-My personal site, but spoOoo0oOOoky
+
+A personal site about myself... but sp00oo0oky!
+
+Made with astro for the second time!!!
+
+Hopefully this scares you :D

@@ -1,0 +1,65 @@
+---
+const RAW_BASE = import.meta.env.BASE_URL;
+
+function withBase(path: string = ""): string {
+  const b = RAW_BASE.endsWith("/") ? RAW_BASE.slice(0, -1) : RAW_BASE; // "/personalsite"
+  const p = path ? (path.startsWith("/") ? path : `/${path}`) : "/";    // "/projects" or "/"
+  return `${b}${p}`;                                                    // "/personalsite/projects" or "/personalsite/"
+}
+
+const links: { href: string; label: string }[] = [
+  { href: withBase(""),         label: "home" },
+  { href: withBase("projects"), label: "my projects" },
+  { href: withBase("logbook"),  label: "logbook" },
+  { href: withBase("blog"),     label: "blog" },
+];
+---
+
+<header class="topbar">
+  <nav class="tabs">
+    {links.map((l) => (
+      <a href={l.href} class="tab">{l.label}</a>
+    ))}
+  </nav>
+  <button id="toggleTheme" class="invert-btn" aria-pressed="false" aria-label="Invert site">invert</button>
+</header>
+
+<script is:inline data-base={RAW_BASE}>
+  (function(){
+    var cs = document.currentScript;
+    var base = (cs && cs.dataset && cs.dataset.base) ? cs.dataset.base : '/';
+
+    var root = document.documentElement;
+    var KEY = 'theme';
+
+    var saved = localStorage.getItem(KEY);
+    if (saved === 'light' || saved === 'dark') root.dataset.theme = saved;
+
+    function joinBase(b, path) {
+      if (!b.endsWith('/')) b += '/';
+      path = String(path).replace(/^\/+/, '');
+      return b + path;
+    }
+
+    function setIcon() {
+      var isLight = root.dataset.theme === 'light';
+      var file = isLight ? 'faviconinvert.svg' : 'favicon.svg';
+      var href = joinBase(base, file) + '?v=' + (isLight ? '1' : '0');
+      document.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]').forEach(function(link){
+        link.setAttribute('type', 'image/svg+xml');
+        link.setAttribute('href', href);
+      });
+    }
+    setIcon();
+
+    var btn = document.getElementById('toggleTheme');
+    if (!btn) return;
+    btn.addEventListener('click', function(){
+      var next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      root.dataset.theme = next;
+      localStorage.setItem(KEY, next);
+      btn.setAttribute('aria-pressed', String(next === 'light'));
+      setIcon();
+    });
+  })();
+</script>

@@ -1,0 +1,75 @@
+make a site with astro
+
+find cool ui animations
+color schemes?
+idk
+
+YEAHHHHHHHHHHHHHH IT FINALLY WORKS LETS GO
+
+okay now the remaining todo stuff:
+    add more ui elements
+        react
+        tailwind
+        or smth else 
+    anime js site finally USE IT 
+    probably gonna be way too complicated but whatever
+    just gotta get it to work no matter what...
+
+pputting this here just in case
+
+
+	<div id="statusBox" class="status" role="status" aria-live="polite">
+		<div id="statusLine" class="status-line"></div>
+	</div>
+
+	<script is:inline>
+		(function(){
+		const el = document.getElementById('statusLine');
+		if (!el) return;
+
+		const items = [
+			{ icon:"🎧", tag:"now listening", text:"unknown brain — fade" },
+			{ icon:"💭", tag:"now thinking", text:"inverse kinematics + ramen" },
+			{ icon:"🛠️", tag:"building",     text:"weird retro web toys" },
+			{ icon:"📚", tag:"reading",      text:"tiny renderer internals" },
+		];
+
+		let i = 0;
+		const ms = 5500; // rotate every ~5.5s
+
+		function render(idx){
+			const it = items[idx % items.length];
+			el.innerHTML =
+			`<span class="icon">${it.icon}</span>`+
+			`<span class="tag">${it.tag}:</span> `+
+			`<span class="muted">${it.text}</span>`;
+		}
+
+		render(i);
+
+		const reduce = (()=> {
+			try { return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches; }
+			catch(e){ return false; }
+		})();
+
+		setInterval(()=>{
+			if (!reduce) el.classList.add('status-fade-out');
+			setTimeout(()=>{
+			i++;
+			render(i);
+			if (!reduce){
+				el.classList.remove('status-fade-out');
+				el.classList.add('status-fade-in');
+				setTimeout(()=> el.classList.remove('status-fade-in'), 220);
+			}
+			}, reduce ? 0 : 220);
+		}, ms);
+
+		let paused = false, timer;
+		const box = document.getElementById('statusBox');
+		const restart = () => { if (timer) clearInterval(timer); timer = setInterval(()=>{}, 1); }; // noop, interval above runs independently
+		box?.addEventListener('mouseenter', ()=> paused=true);
+		box?.addEventListener('mouseleave', ()=> paused=false);
+		setInterval(()=>{ if (paused) i--; }, ms);
+		})();
+	</script>

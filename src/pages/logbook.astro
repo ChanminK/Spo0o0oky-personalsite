@@ -1,0 +1,84 @@
+---
+import "../styles/global.css";
+import Topbar from "../components/Topbar.astro";
+
+const BASE = import.meta.env.BASE_URL;
+const USER  = "ChanminK";
+const REPO  = "personalsite";
+const LABEL = "guestbook";
+---
+
+<html lang="en" data-theme="dark" data-base={BASE}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href={`${BASE}favicon.svg`} />
+    <link rel="shortcut icon" type="image/svg+xml" href={`${BASE}favicon.svg`} />
+    <title>alive — logbook</title>
+  </head>
+  <body>
+    <Topbar />
+    <main class="wrap">
+      <h1>logbook</h1>
+      <p class="muted">Leave a note—your name + a short message.</p>
+
+      <form id="guestForm" class="block-form">
+        <div class="row">
+          <label class="label" for="name">name</label>
+          <input id="name" name="name" required />
+        </div>
+        <div class="row">
+          <label class="label" for="msg">message</label>
+          <textarea id="msg" name="msg" rows="4" required></textarea>
+        </div>
+        <button type="submit" class="invert-btn">submit</button>
+      </form>
+
+      <section style="margin-top:24px">
+        <h2>entries</h2>
+        <div id="entries" class="cards"></div>
+      </section>
+    </main>
+
+    <script is:inline>
+      const USER  = "ChanminK";
+      const REPO  = "personalsite";
+      const LABEL = "guestbook";
+
+      document.getElementById('guestForm')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = (document.getElementById('name').value || "").trim();
+        const msg  = (document.getElementById('msg').value || "").trim();
+        if (!name || !msg) return;
+
+        const title  = encodeURIComponent(`Guestbook: ${name}`);
+        const body   = encodeURIComponent(msg + "\n\n— submitted from the logbook page");
+        const labels = encodeURIComponent(LABEL);
+
+        const url = `https://github.com/${USER}/${REPO}/issues/new?title=${title}&body=${body}&labels=${labels}`;
+        window.open(url, "_blank", "noopener,noreferrer");
+      });
+
+      const entries = document.getElementById('entries');
+      fetch(`https://api.github.com/repos/${USER}/${REPO}/issues?labels=${encodeURIComponent(LABEL)}&state=open&per_page=50`)
+        .then(r => r.json())
+        .then(list => {
+          if (!Array.isArray(list)) { entries.textContent = "No entries yet."; return; }
+          const html = list.map(it => `
+            <article class="card">
+              <div class="repo-title">${(it.title || "").replace(/^Guestbook:\s*/, "")}</div>
+              <div class="repo-desc">${(it.body || "").replace(/\n/g,'<br>')}</div>
+              <div class="repo-meta">
+                <span>by ${it.user?.login ?? "someone"}</span>
+                <span>${new Date(it.created_at).toLocaleDateString()}</span>
+              </div>
+            </article>
+          `).join("");
+          entries.innerHTML = html || "<p class='muted'>Be the first to sign.</p>";
+        })
+        .catch(() => entries.textContent = "Failed to load entries.");
+    </script>
+
+    <footer class="site-footer">made with astro + Need coffee</footer>
+  </body>
+</html>

@@ -1,0 +1,80 @@
+---
+import "../styles/global.css";
+import Topbar from "../components/Topbar.astro";
+
+const BASE = import.meta.env.BASE_URL;
+const USER = "ChanminK";
+
+const ART: string[] = [
+  "orpheous.png",
+  "background.jpg",
+  "orhpeousdrawing.png",
+];
+---
+
+<html lang="en" data-theme="dark" data-base={BASE}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href={`${BASE}favicon.svg`} />
+    <link rel="shortcut icon" type="image/svg+xml" href={`${BASE}favicon.svg`} />
+    <title>alive — projects</title>
+  </head>
+  <body>
+    <Topbar />
+    <main class="wrap">
+      <h1>my projects</h1>
+
+      <section>
+        <h2>code</h2>
+        <div id="repos" class="cards"></div>
+      </section>
+
+      <section>
+        <h2>art</h2>
+        {ART.length === 0 ? (
+          <p class="muted">Drop images into <code>public/art/</code> and list them above.</p>
+        ) : (
+          <div class="art-grid">
+            {ART.map((f: string) => (
+              <figure class="art-card">
+                <img src={`${BASE}art/${f}`} alt={f} loading="lazy" />
+                <figcaption>{f}</figcaption>
+              </figure>
+            ))}
+          </div>
+        )}
+      </section>
+    </main>
+
+    <script is:inline>
+      const user = "ChanminK";
+      const target = document.getElementById('repos');
+
+      fetch(`https://api.github.com/users/${user}/repos?per_page=100&sort=updated`)
+        .then(r => r.json())
+        .then(repos => {
+          if (!Array.isArray(repos)) { target.textContent = "No repos found."; return; }
+          const html = repos
+            .filter(r => !r.fork)
+            .slice(0, 20)
+            .map(r => `
+              <article class="card">
+                <div class="repo-title">
+                  <a href="${r.html_url}" target="_blank" rel="noreferrer">${r.name}</a>
+                </div>
+                <div class="repo-desc">${r.description ?? ""}</div>
+                <div class="repo-meta">
+                  <span>★ ${r.stargazers_count}</span>
+                  <span>updated ${new Date(r.updated_at).toLocaleDateString()}</span>
+                </div>
+              </article>
+            `).join("");
+          target.innerHTML = html || "<p class='muted'>Nothing to show yet.</p>";
+        })
+        .catch(() => target.textContent = "Failed to load repos.");
+    </script>
+
+    <footer class="site-footer">made with astro + Need coffee</footer>
+  </body>
+</html>
