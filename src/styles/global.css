@@ -2,6 +2,9 @@
   --bg:#000;
   --ink:#fff;
   --line:#000;
+
+  --font-body: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-heading: var(--font-body);
 }
 
 :root[data-theme="light"]{
@@ -10,6 +13,17 @@
   --line:#000;
 }
 
+:root[data-theme="spooky"]{
+  --bg:#ff6a00;
+  --ink:#ffffff;
+  --line:#ffffff;
+  --font-heading: "Creepster", var(--font-body);
+}
+
+a { color: var(--ink); }
+a:hover { opacity: .85; }
+
+
 *{box-sizing:border-box}
 html,body{height:100%}
 
@@ -17,10 +31,11 @@ body{
   margin:0;
   background: var(--bg);
   color: var(--ink);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  font-family: var(--font-body);
   line-height:1.4;
   -webkit-font-smoothing: none; 
 }
+h1, h2, .site-title{ font-family: var(--font-heading);}
 
 .wrap{
     max-width:880px;
@@ -245,4 +260,66 @@ h2{margin:24px 0 8px 0; font-size:18px; text-transform:lowercase; border-bottom:
   width: 22px; height: 22px; line-height: 20px; text-align: center;
   border: 2px solid var(--ink); background: var(--bg); color: var(--ink);
   font: inherit; cursor: pointer;
+}
+
+:root[data-theme="spooky"] body > *{
+  position: relative;
+  z-index: 1;
+}
+
+:root[data-theme="spooky"] body::before,
+:root[data-theme="spooky"] body::after{
+  content:"";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+:root[data-theme="spooky"] body::before{
+  opacity: .12;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 40'%3E%3Cpath fill='%23ffffff' d='M12 18c3-6 9-6 12 0c4-3 9-3 13 0c3-6 9-6 12 0l-5 2l-6-1l-5 2l-6-1z'/%3E%3Cpath fill='%23ffffff' d='M52 30c3-6 9-6 12 0c4-3 9-3 13 0c3-6 9-6 12 0l-5 2l-6-1l-5 2l-6-1z'/%3E%3C/svg%3E");
+  background-size: 160px 80px;
+  background-repeat: repeat;
+  animation: bats-pan 40s linear infinite;
+  mix-blend-mode: soft-light;
+}
+
+:root[data-theme="spooky"] body::after{
+  background:
+    radial-gradient(120px 120px at 0 0, rgba(255,255,255,.18), transparent 60%),
+    radial-gradient(160px 160px at 100% 0, rgba(255,255,255,.16), transparent 60%),
+    radial-gradient(140px 140px at 0 100%, rgba(255,255,255,.14), transparent 60%),
+    radial-gradient(180px 180px at 100% 100%, rgba(255,255,255,.12), transparent 60%),
+    radial-gradient(120% 120% at 50% 50%, transparent 55%, rgba(0,0,0,.18) 100%);
+}
+
+@keyframes bats-pan{
+  from{ background-position: 0 0; }
+  to  { background-position: 800px 200px; }
+}
+
+:root[data-theme="spooky"] h1,
+:root[data-theme="spooky"] h2{
+  text-shadow:
+    0 0 6px rgba(255,255,255,.35),
+    0 0 18px rgba(255,255,255,.18);
+  animation: candle 3.2s infinite ease-in-out;
+}
+
+@keyframes candle{
+  0%, 100% { opacity: 1; }
+  8%  { opacity: .92; text-shadow: 0 0 7px rgba(255,255,255,.40), 0 0 22px rgba(255,255,255,.20); }
+  11% { opacity: .78; }
+  14% { opacity: .98; }
+  38% { opacity: .90; }
+  42% { opacity: .75; text-shadow: 0 0 10px rgba(255,255,255,.45), 0 0 26px rgba(255,255,255,.25); }
+  55% { opacity: .96; }
+  73% { opacity: .88; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  :root[data-theme="spooky"] body::before{ animation: none; }
+  :root[data-theme="spooky"] h1,
+  :root[data-theme="spooky"] h2{ animation: none; }
 }

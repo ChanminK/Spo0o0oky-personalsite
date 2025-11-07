@@ -38,15 +38,15 @@ const {
 
 <script is:inline>
 (() => {
-  // Select the wrapper without any Astro interpolation:
-  const root = (document.currentScript && document.currentScript.previousElementSibling) as HTMLElement | null;
-  if (!root) return;
+  const maybeRoot = document.currentScript && document.currentScript.previousElementSibling;
+  if (!(maybeRoot instanceof HTMLElement)) return;
+  const root = maybeRoot;
 
   const key  = root.getAttribute('data-key')  || 'statusbox';
   const mode = root.getAttribute('data-mode') || 'docked';
-  const box  = root.querySelector('.status') as HTMLElement | null;
-  const btn  = root.querySelector('[data-close]') as HTMLButtonElement | null;
-]
+  const box  = root.querySelector('.status');
+  const btn  = root.querySelector('[data-close]');
+
   if (sessionStorage.getItem(key + '-closed') === '1') {
     root.style.display = 'none';
     return;
@@ -54,18 +54,20 @@ const {
 
   let stop = () => {};
 
-  btn?.addEventListener('click', () => {
-    sessionStorage.setItem(key + '-closed', '1');
-    try { stop(); } catch {}
-    root.style.display = 'none';
-  });
+  if (btn instanceof HTMLButtonElement) {
+    btn.addEventListener('click', () => {
+      sessionStorage.setItem(key + '-closed', '1');
+      try { stop(); } catch {}
+      root.style.display = 'none';
+    });
+  }
 
-  if (mode !== 'bounce' || !box) return;
+  if (mode !== 'bounce' || !(box instanceof HTMLElement)) return;
 
   let raf = 0;
   let x = Math.max(8, root.offsetLeft || innerWidth  * 0.12);
   let y = Math.max(8, root.offsetTop  || innerHeight * 0.18);
-  let vx = 1.1, vy = 1.0; // px/frame
+  let vx = 1.1, vy = 1.0; 
   const M = 8;
   let reduce = false;
   try { reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch {}

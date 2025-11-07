@@ -24,42 +24,35 @@ const links: { href: string; label: string }[] = [
   <button id="toggleTheme" class="invert-btn" aria-pressed="false" aria-label="Invert site">invert</button>
 </header>
 
-<script is:inline data-base={RAW_BASE}>
-  (function(){
-    var cs = document.currentScript;
-    var base = (cs && cs.dataset && cs.dataset.base) ? cs.dataset.base : '/';
+<script is:inline>
+(function () {
+  var btn  = document.getElementById('toggleTheme');
+  if (!btn) return;
 
-    var root = document.documentElement;
-    var KEY = 'theme';
+  var root = document.documentElement;         
+  var KEY  = 'theme';
+  var PREV = 'prev-theme';
 
-    var saved = localStorage.getItem(KEY);
-    if (saved === 'light' || saved === 'dark') root.dataset.theme = saved;
+  var saved = localStorage.getItem(KEY);
+  if (saved === 'light' || saved === 'dark' || saved === 'spooky') {
+    root.setAttribute('data-theme', saved);
+  }
+  
+  btn.setAttribute('aria-pressed', String(root.getAttribute('data-theme') === 'spooky'));
 
-    function joinBase(b, path) {
-      if (!b.endsWith('/')) b += '/';
-      path = String(path).replace(/^\/+/, '');
-      return b + path;
+  btn.addEventListener('click', function(){
+    var cur = root.getAttribute('data-theme') || 'dark';
+    if (cur === 'spooky') {
+      var prev = localStorage.getItem(PREV) || 'dark';
+      root.setAttribute('data-theme', prev);
+      localStorage.setItem(KEY, prev);
+      btn.setAttribute('aria-pressed', 'false');
+    } else {
+      localStorage.setItem(PREV, cur);
+      root.setAttribute('data-theme', 'spooky');
+      localStorage.setItem(KEY, 'spooky');
+      btn.setAttribute('aria-pressed', 'true');
     }
-
-    function setIcon() {
-      var isLight = root.dataset.theme === 'light';
-      var file = isLight ? 'faviconinvert.svg' : 'favicon.svg';
-      var href = joinBase(base, file) + '?v=' + (isLight ? '1' : '0');
-      document.querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]').forEach(function(link){
-        link.setAttribute('type', 'image/svg+xml');
-        link.setAttribute('href', href);
-      });
-    }
-    setIcon();
-
-    var btn = document.getElementById('toggleTheme');
-    if (!btn) return;
-    btn.addEventListener('click', function(){
-      var next = root.dataset.theme === 'dark' ? 'light' : 'dark';
-      root.dataset.theme = next;
-      localStorage.setItem(KEY, next);
-      btn.setAttribute('aria-pressed', String(next === 'light'));
-      setIcon();
-    });
-  })();
+  });
+})();
 </script>
