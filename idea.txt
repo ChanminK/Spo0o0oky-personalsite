@@ -15,6 +15,3 @@ LETS DO 3 THINGS TO MAKE IT "SPOOKY(or ig halloween)"
 3 - add another page
 	link to the jumpscare project
 	have some jumpscares too 
-
-I WANNA USE ANIME JS EVENTUALLY CMON
-https://animejs.com/documentation/getting-started/installation/

@@ -1,0 +1,284 @@
+---
+import "../styles/global.css";
+import Topbar from "../components/Topbar.astro";
+const BASE = import.meta.env.BASE_URL;
+---
+
+<html lang="en" data-base={BASE}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Jumpscares</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
+
+    <style>
+      main.wrap{ max-width:880px; margin:80px auto 40px; padding:0 16px; }
+
+      .links{ display:flex; flex-wrap:wrap; gap:12px; margin-top:8px }
+      .links a{
+        display:inline-block; text-decoration:none; font-weight:700;
+        border:2px solid var(--ink); color:var(--ink); padding:6px 10px;
+      }
+      .links a:hover{ background:var(--ink); color:var(--bg); }
+
+      .panel{ border:2px solid var(--ink); padding:12px; margin-top:16px; }
+      .row{ display:grid; grid-template-columns:140px 1fr; gap:10px; align-items:center; margin:8px 0; }
+      .row label{ font-weight:700; }
+      .btn{
+        appearance:none; background:transparent; color:var(--ink);
+        border:2px solid var(--ink); padding:8px 12px; cursor:pointer; font-weight:800;
+      }
+      .btn:hover{ background:var(--ink); color:var(--bg); }
+
+      .scare {
+        position: fixed; inset: 0; z-index: 50;
+        display: none; place-items: center;
+        background: rgba(255,255,255,0.0); 
+        pointer-events: none;
+      }
+      .scare.go { display: grid; animation: scare-seq 1100ms ease-out 1 both; }
+
+      .scare-img{
+        width: min(80vw, 680px);
+        height: auto;
+        max-height: 80vh;
+        object-fit: contain;
+        filter: contrast(1.06) saturate(1.05);
+        transform: scale(.9);
+        animation: scare-pop 750ms cubic-bezier(.2,1.4,.2,1) 1 both;
+      }
+
+      .scare-fallback {
+        width: 56vmin; height: 56vmin; border-radius: 50%;
+        background: radial-gradient(ellipse at 50% 55%, #fff 0%, #eee 40%, #ccc 85%, transparent 86%),
+                    radial-gradient(circle at 35% 40%, #000 0 16%, transparent 17%),
+                    radial-gradient(circle at 65% 40%, #000 0 16%, transparent 17%),
+                    radial-gradient(ellipse at 50% 72%, #000 0 18%, transparent 19%);
+        box-shadow: 0 10px 40px rgba(0,0,0,.35);
+        transform: scale(.9);
+        animation: scare-pop 750ms cubic-bezier(.2,1.4,.2,1) 1 both;
+      }
+
+      @keyframes scare-seq{
+        0%   { background: rgba(255,255,255,0); }
+        6%   { background: rgba(255,255,255,1); }
+        50%  { background: rgba(0,0,0,.25); }
+        100% { background: rgba(0,0,0,0); }
+      }
+      @keyframes scare-pop{
+        0% { transform: scale(.75) rotate(-2deg); opacity:.0; }
+        50%{ transform: scale(1.05) rotate(2deg);  opacity:1; }
+        100%{transform: scale(1.0) rotate(0deg);   opacity:1; }
+      }
+
+      .shake { animation: shake-k 450ms ease-in-out 1; }
+      @keyframes shake-k{
+        0% { transform: translate3d(0,0,0); }
+        25%{ transform: translate3d(-6px, 3px, 0); }
+        50%{ transform: translate3d(4px, -2px, 0); }
+        75%{ transform: translate3d(-3px, 4px, 0); }
+        100%{transform: translate3d(0,0,0); }
+      }
+
+      @media (prefers-reduced-motion: reduce){
+        .scare.go { animation: none; background: rgba(0,0,0,.35); }
+        .scare-img, .scare-fallback { animation: none; transform: none; }
+        .shake { animation: none; }
+      }
+
+      h1 { font-family: "Creepster", var(--font-body); }
+    </style>
+  </head>
+
+  <body>
+    <Topbar />
+
+    <main class="wrap">
+      <h1>Jumpscares</h1>
+      <p class="muted">For fun &amp; fright — auto-scares only run in <strong>spooky</strong> theme.</p>
+
+      <div class="links">
+        <a href="https://scary-finder-web-p5ol.vercel.app/" target="_blank" rel="noreferrer noopener">▶ Live: ScaryFinder</a>
+        <a href="https://github.com/ChanminK/ScaryFinder" target="_blank" rel="noreferrer noopener"> Repo: ScaryFinder</a>
+      </div>
+
+      <div class="panel">
+        <div class="row">
+          <label>Manual</label>
+          <div>
+            <button class="btn" id="btnTest">Trigger jumpscare</button>
+          </div>
+        </div>
+
+        <div class="row">
+          <label>Auto scares</label>
+          <div>
+            <button class="btn" id="btnAuto">Start (spooky only)</button>
+            <span class="muted" id="autoStatus">off</span>
+          </div>
+        </div>
+
+        <div class="row">
+          <label>Intensity</label>
+          <div>
+            <select id="level" class="btn">
+              <option value="low">low</option>
+              <option value="med" selected>medium</option>
+              <option value="high">high</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <label>Sound</label>
+          <div>
+            <label><input type="checkbox" id="sound" checked /> enable sound</label>
+          </div>
+        </div>
+
+      </div>
+    </main>
+    
+    <div id="scare" class="scare" aria-hidden="true"></div>
+
+    <script is:inline>
+      (function(){
+        const root    = document.documentElement;
+        const scare   = document.getElementById('scare');
+        const btnTest = document.getElementById('btnTest');
+        const btnAuto = document.getElementById('btnAuto');
+        const autoTxt = document.getElementById('autoStatus');
+        const selLvl  = document.getElementById('level');
+        const chkSnd  = document.getElementById('sound');
+
+        let audioEl = null;     
+        let beep    = null;     
+        let autoOn  = false;
+        let autoTO  = 0;
+        let hasImg  = false;
+
+        const BASE   = (document.currentScript && document.currentScript.previousElementSibling ? '' : '') || '';
+        const imgURL = (root.getAttribute('data-base') || '/') + 'jumpscare.png';
+        const sndURL = (root.getAttribute('data-base') || '/') + 'jumpscare.mp3';
+
+        (function preloadImg(){
+          const img = new Image();
+          img.onload = () => { hasImg = true; };
+          img.onerror = () => { hasImg = false; };
+          img.src = imgURL + '?v=1';
+        })();
+
+        (function prepAudio(){
+          const a = new Audio();
+          a.src = sndURL + '?v=1';
+          a.preload = 'auto';
+          a.volume = 0.9;
+          a.addEventListener('canplaythrough', () => { audioEl = a; }, { once:true });
+          a.addEventListener('error', () => {
+            try {
+              const ctx = new (window.AudioContext || window.webkitAudioContext)();
+              beep = (dur=0.25, vol=0.3) => {
+                const o = ctx.createOscillator();
+                const g = ctx.createGain();
+                o.type = 'sawtooth';
+                o.frequency.setValueAtTime(420, ctx.currentTime);
+                g.gain.setValueAtTime(vol, ctx.currentTime);
+                o.connect(g); g.connect(ctx.destination);
+                o.start(); o.stop(ctx.currentTime + dur);
+              };
+            } catch(e){}
+          }, { once:true });
+
+          a.load();
+        })();
+
+        function playSound(level){
+          if (!chkSnd.checked) return;
+          if (audioEl){
+            audioEl.currentTime = 0;
+            audioEl.play().catch(()=>{});
+          } else if (beep){
+            const v = level==='high' ? 0.45 : level==='low' ? 0.20 : 0.3;
+            beep(0.22, v);
+          }
+        }
+
+        function triggerScare(){
+          let reduced = false;
+          try { reduced = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch(e){}
+
+          scare.innerHTML = '';
+          const videoURL = (root.getAttribute('data-base') || '/') + 'jumpscare.mp4';
+            if (videoURL) {
+            const vid = document.createElement('video');
+            vid.src = videoURL;
+            vid.autoplay = true;
+            vid.muted = false;      
+            vid.playsInline = true;  
+            vid.className = 'scare-img';
+            scare.appendChild(vid);
+            }
+
+          if (!reduced) document.body.classList.add('shake');
+
+          scare.classList.add('go');
+
+
+          playSound(selLvl.value);
+
+          setTimeout(()=>{
+            scare.classList.remove('go');
+            document.body.classList.remove('shake');
+            scare.innerHTML = '';
+          }, 1100);
+        }
+
+        function scheduleNext(){
+          if (!autoOn) return;
+          if ((root.getAttribute('data-theme') || 'dark') !== 'spooky') { autoTxt.textContent='off'; autoOn=false; return; }
+
+          const lvl = selLvl.value;
+          const [min,max] = (lvl==='high') ? [4500, 11000] : (lvl==='low') ? [13000, 24000] : [8000, 16000];
+          const delay = Math.floor(min + Math.random()*(max - min));
+          autoTO = window.setTimeout(() => { triggerScare(); scheduleNext(); }, delay);
+          autoTxt.textContent = 'on (next in ' + Math.round(delay/1000) + 's)';
+        }
+
+        function startAuto(){
+          if (autoOn) return;
+          if ((root.getAttribute('data-theme') || 'dark') !== 'spooky') {
+            autoTxt.textContent = 'off (needs spooky theme)';
+            return;
+          }
+          let reduced = false;
+          try { reduced = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch(e){}
+          if (reduced){
+            autoTxt.textContent = 'off (reduced motion)';
+            return;
+          }
+          autoOn = true;
+          scheduleNext();
+        }
+        function stopAuto(){
+          autoOn = false;
+          autoTxt.textContent = 'off';
+          if (autoTO) { clearTimeout(autoTO); autoTO = 0; }
+        }
+
+        btnTest?.addEventListener('click', triggerScare);
+        btnAuto?.addEventListener('click', () => autoOn ? stopAuto() : startAuto());
+        selLvl?.addEventListener('change', () => { if (autoOn){ stopAuto(); startAuto(); } });
+
+        const mo = new MutationObserver(() => {
+          if (!autoOn) return;
+          if ((root.getAttribute('data-theme') || 'dark') !== 'spooky') stopAuto();
+        });
+        mo.observe(root, { attributes:true, attributeFilter:['data-theme'] });
+
+      })();
+    </script>
+  </body>
+</html>

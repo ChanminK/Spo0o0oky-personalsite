@@ -323,3 +323,46 @@ h2{margin:24px 0 8px 0; font-size:18px; text-transform:lowercase; border-bottom:
   :root[data-theme="spooky"] h1,
   :root[data-theme="spooky"] h2{ animation: none; }
 }
+
+:root[data-theme="spooky"] body{
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' stroke='%23000' stroke-width='1' d='M12 3c-3.3 0-6 2.7-6 6v9c0 .6.4 1 1 1 .8 0 1.2-.6 1.8-1.2.6-.7 1.3-1.5 2.2-1.5s1.6.8 2.2 1.5c.6.7 1.1 1.2 1.8 1.2s1-.4 1-1V9c0-3.3-2.7-6-6-6z'/%3E%3Ccircle cx='9' cy='10' r='1.5' fill='%23000'/%3E%3Ccircle cx='15' cy='10' r='1.5' fill='%23000'/%3E%3C/svg%3E") 12 12, auto;
+}
+
+:root[data-theme="spooky"] a,
+:root[data-theme="spooky"] button,
+:root[data-theme="spooky"] .tab,
+:root[data-theme="spooky"] .invert-btn {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' stroke='%23000' stroke-width='1' d='M12 3c-3.3 0-6 2.7-6 6v9c0 .6.4 1 1 1 .8 0 1.2-.6 1.8-1.2.6-.7 1.3-1.5 2.2-1.5s1.6.8 2.2 1.5c.6.7 1.1 1.2 1.8 1.2s1-.4 1-1V9c0-3.3-2.7-6-6-6z'/%3E%3Ccircle cx='9' cy='10' r='1.5' fill='%23000'/%3E%3Ccircle cx='15' cy='10' r='1.5' fill='%23000'/%3E%3C/svg%3E") 12 12, pointer;
+}
+
+:root[data-theme="spooky"] .ghosts-layer{
+  position: fixed;
+  inset: 0;
+  pointer-events: none;  
+  z-index: 0;             
+}
+
+.ghost{
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background-repeat: no-repeat;
+  background-size: contain;
+  opacity: .85;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,.25));
+  animation: ghost-wiggle 2.8s ease-in-out infinite;
+}
+
+
+.ghost{
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' stroke='%23000' stroke-width='1' d='M12 3c-3.3 0-6 2.7-6 6v9c0 .6.4 1 1 1 .8 0 1.2-.6 1.8-1.2.6-.7 1.3-1.5 2.2-1.5s1.6.8 2.2 1.5c.6.7 1.1 1.2 1.8 1.2s1-.4 1-1V9c0-3.3-2.7-6-6-6z'/%3E%3Ccircle cx='9' cy='10' r='1.5' fill='%23000'/%3E%3Ccircle cx='15' cy='10' r='1.5' fill='%23000'/%3E%3C/svg%3E");
+}
+
+@keyframes ghost-wiggle{
+  0%,100% { transform: rotate(-3deg); }
+  50%     { transform: rotate( 3deg); }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .ghost{ animation: none; }
+}
